@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+model client {
+  id         Int        @id @default(autoincrement())
+  email       String     @unique
+  password   String     // Password field for authentication
+  projects   project[]
+}
+
+model project {
+  id            Int         @id @default(autoincrement())
+  title         String
+  description   String
+  status        ProjectStatus
+  clientId      Int
+  client        client       @relation(fields: [clientId], references: [id])
+  freelancers   ProjectFreelancer[]
+}
+
+model freelancer {
+  id           Int               @id @default(autoincrement())
+  email        String            @unique
+  password     String            // Password field for authentication
+  skills       skill[]
+  projects     ProjectFreelancer[]
+}
+
+model skill {
+  id           Int         @id @default(autoincrement())
+  name         String
+  freelancers  freelancer[]
+}
+
+model ProjectFreelancer {
+  projectId    Int
+  freelancerId Int
+  project      project    @relation(fields: [projectId], references: [id])
+  freelancer   freelancer @relation(fields: [freelancerId], references: [id])
+
+  @@id([projectId, freelancerId]) // Composite primary key to ensure unique pairs
+}
+
+enum Expertise {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ProjectStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+

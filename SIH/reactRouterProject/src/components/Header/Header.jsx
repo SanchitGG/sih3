@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-// import logo from "../Header/frilance logo.png"; // Import the logo
+import { useRecoilValue } from "recoil";
+import { userRoleState } from "../../../../State/state"; // Import the user role state
 import logo from "../../assets/Images/frilance logo.png"; // Import the logo
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const userRole = useRecoilValue(userRoleState); // Get the user's role from Recoil state
+console.log(userRole);
   // Function to toggle the hamburger menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,32 +20,23 @@ export default function Header() {
 
           {/* Hamburger and Logo (Tablet/Mobile View) */}
           <div className="flex items-center lg:hidden w-full justify-between">
-            {/* Hamburger Icon on the left */}
             <button
               className="text-gray-800 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
               onClick={toggleMenu}
             >
-              {/* Hamburger icon with 3 bars */}
               <div className={`space-y-1 ${isMenuOpen ? "open" : ""}`}>
                 <span
-                  className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${
-                    isMenuOpen ? "rotate-45 translate-y-2" : ""
-                  }`}
+                  className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}
                 ></span>
                 <span
-                  className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ease-in-out ${
-                    isMenuOpen ? "opacity-0" : ""
-                  }`}
+                  className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ease-in-out ${isMenuOpen ? "opacity-0" : ""}`}
                 ></span>
                 <span
-                  className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${
-                    isMenuOpen ? "-rotate-45 -translate-y-2" : ""
-                  }`}
+                  className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
                 ></span>
               </div>
             </button>
 
-            {/* Logo in the center for mobile/tablet view */}
             <Link to="/" className="flex items-center">
               <img
                 src={logo} // Use the imported local logo
@@ -52,7 +45,6 @@ export default function Header() {
               />
             </Link>
 
-            {/* Combined Login/Sign up button on the right */}
             <div className="flex items-center">
               <Link
                 to="/login"
@@ -63,7 +55,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Logo on the left for desktop view */}
           <Link to="/" className="hidden lg:flex items-center">
             <img
               src={logo} // Use the imported local logo
@@ -72,7 +63,6 @@ export default function Header() {
             />
           </Link>
 
-          {/* Centered Menu for Desktop View */}
           <div className="hidden lg:flex justify-center flex-grow">
             <ul className="flex space-x-4">
               <li>
@@ -99,18 +89,39 @@ export default function Header() {
                   About
                 </NavLink>
               </li>
-              <li>
-                <NavLink
-                  to="/test"
-                  className={({ isActive }) =>
-                    `block py-2 pr-4 pl-3 duration-200 ${
-                      isActive ? "text-orange-700" : "text-gray-700"
-                    } hover:text-orange-700`
-                  }
-                >
-                  Take Test
-                </NavLink>
-              </li>
+
+              {/* Conditional Rendering Based on User Role */}
+              {userRole === "Freelancer" && (
+                <>
+                  <li>
+                    <NavLink
+                      to="/test"
+                      className={({ isActive }) =>
+                        `block py-2 pr-4 pl-3 duration-200 ${
+                          isActive ? "text-orange-700" : "text-gray-700"
+                        } hover:text-orange-700`
+                      }
+                    >
+                      Take Test
+                    </NavLink>
+                  </li>
+                  
+                </>
+              )}
+              {userRole === "Client" && (
+                <li>
+                  <NavLink
+                    to="/repositoryPage"
+                    className={({ isActive }) =>
+                      `block py-2 pr-4 pl-3 duration-200 ${
+                        isActive ? "text-orange-700" : "text-gray-700"
+                      } hover:text-orange-700`
+                    }
+                  >
+                    Repository
+                  </NavLink>
+                </li>
+              )}
               <li>
                 <NavLink
                   to="/contact"
@@ -123,23 +134,9 @@ export default function Header() {
                   Contact
                 </NavLink>
               </li>
-              {/* Repository menu option */}
-              <li>
-                <NavLink
-                  to="/repositoryPage"
-                  className={({ isActive }) =>
-                    `block py-2 pr-4 pl-3 duration-200 ${
-                      isActive ? "text-orange-700" : "text-gray-700"
-                    } hover:text-orange-700`
-                  }
-                >
-                  Repository
-                </NavLink>
-              </li>
             </ul>
           </div>
 
-          {/* Login/Sign up button on the right for desktop view */}
           <div className="hidden lg:flex items-center lg:order-3">
             <Link
               to="/login"
@@ -149,7 +146,6 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu - Rendered when hamburger is clicked */}
           {isMenuOpen && (
             <div className="lg:hidden w-full mt-4">
               <ul className="flex flex-col font-medium space-y-2">
@@ -171,15 +167,41 @@ export default function Header() {
                     About
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/test"
-                    className="block py-2 px-4 text-gray-700 hover:bg-gray-100"
-                    onClick={toggleMenu}
-                  >
-                    Take Test
-                  </NavLink>
-                </li>
+                
+                {/* Conditional Rendering for Mobile Menu */}
+                {userRole === "Freelancer" && (
+                  <>
+                    <li>
+                      <NavLink
+                        to="/test"
+                        className="block py-2 px-4 text-gray-700 hover:bg-gray-100"
+                        onClick={toggleMenu}
+                      >
+                        Take Test
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink
+                        to="/quiz"
+                        className="block py-2 px-4 text-gray-700 hover:bg-gray-100"
+                        onClick={toggleMenu}
+                      >
+                        Quiz
+                      </NavLink>
+                    </li>
+                  </>
+                )}
+                {userRole === "Client" && (
+                  <li>
+                    <NavLink
+                      to="/repositoryPage"
+                      className="block py-2 px-4 text-gray-700 hover:bg-gray-100"
+                      onClick={toggleMenu}
+                    >
+                      Repository
+                    </NavLink>
+                  </li>
+                )}
                 <li>
                   <NavLink
                     to="/contact"
@@ -187,16 +209,6 @@ export default function Header() {
                     onClick={toggleMenu}
                   >
                     Contact
-                  </NavLink>
-                </li>
-                {/* Repository menu option in mobile view */}
-                <li>
-                  <NavLink
-                    to="/repositoryPage"
-                    className="block py-2 px-4 text-gray-700 hover:bg-gray-100"
-                    onClick={toggleMenu}
-                  >
-                    Repository
                   </NavLink>
                 </li>
               </ul>
