@@ -126,11 +126,15 @@
 // };
 
 // export default Quiz;
-
+import Groq from "groq-sdk";
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { quizData } from "../questionsData"; // Import the quiz data
-
+const apiKey = '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';
+const groq = new Groq({
+  apiKey,
+  dangerouslyAllowBrowser: true, // Enable this option
+});
 const Quiz = () => {
   const { topic } = useParams();
   const questions = quizData[topic] || [];
@@ -140,6 +144,7 @@ const Quiz = () => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60); // Start with 60 seconds for each question
   const [showAnswers, setShowAnswers] = useState(false);
+  const [showsuggestions, setShowsuggestions] = useState(false);
 
   // Timer for the quiz
   useEffect(() => {
@@ -185,7 +190,66 @@ const Quiz = () => {
   const handleShowAnswers = () => {
     setShowAnswers(!showAnswers);
   };
+  const handleShowsuggestions = () => {
+    setShowsuggestions(!showsuggestions);
+  }
+  const main = async () => {
+    const chatCompletion = await getGroqChatCompletion();
+    // Print the completion returned by the LLM.
+    return chatCompletion.choices[0]?.message?.content || "";
+  };
+  
+  const getGroqChatCompletion = async () => {
+  return groq.chat.completions.create({
+    messages: [
+      {
+        role: "user",
+        content: `suggest some online courses so i can improve myself on ${topic}.Be concise`,
+      },
+    ],
+    model: "llama3-8b-8192",
+  });
+}
+const YourComponent = () => {
+  const [showsuggestions, setShowSuggestions] = useState(false); // Control showing suggestions
+  const [suggestionContent, setSuggestionContent] = useState(""); // State to hold suggestion
+  const [loading, setLoading] = useState(false); // State to manage loading
+  const [error, setError] = useState(null); // State to manage errors
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      setLoading(true); // Set loading to true
+      setError(null); // Reset error state
+
+      try {
+        const result = await main(); // Call the main function
+        setSuggestionContent(result); // Store the result in state
+      } catch (err) {
+        setError(err.message); // Handle any errors
+      } finally {
+        setLoading(false); // Set loading to false
+      }
+    };
+
+    if (showsuggestions) {
+      fetchSuggestions(); // Fetch suggestions if showsuggestions is true
+    }
+  }, [showsuggestions]); // Dependency array
+
+  return (
+    <div>
+      {showsuggestions && (
+        <div className="suggestions mt-4">
+          {loading && <p>Loading suggestions...</p>} {/* Loading state */}
+          {error && <p className="text-red-500">Error: {error}</p>} {/* Error message */}
+          {!loading && !error && <p>{suggestionContent}</p>} {/* Render the suggestion content */}
+        </div>
+      )}
+      {/* Your trigger for showing suggestions */}
+      <button onClick={() => setShowSuggestions(true)}>Get Suggestions</button>
+    </div>
+  );
+};
   // Auto-submit if the user changes the tab or minimizes the window
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -219,6 +283,13 @@ const Quiz = () => {
           >
             {showAnswers ? "Hide Answers" : "Show Answers"}
           </button>
+          <br />
+          <button
+            onClick={handleShowsuggestions}
+            className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            {showsuggestions ? "Hide suggestions" : "Show suggestions"}
+          </button>
           {showAnswers && (
             <div className="answers mt-4">
               {questions.map((question, index) => (
@@ -229,6 +300,11 @@ const Quiz = () => {
                 </div>
               ))}
             </div>
+          )}
+          {showsuggestions && (
+            <div className="suggestions mt-4">
+             <YourComponent />
+              </div>
           )}
           <Link to="/" className="mt-4 block text-blue-500">
             Back to Topics

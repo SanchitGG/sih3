@@ -1,9 +1,9 @@
 // src/components/Login.jsx
 import React from "react";
-import AuthForm from "./AuthForm";
+import LoginForm from "./LoginForm";
 
 const Login = () => (
-  <AuthForm
+  <LoginForm
     title="Log In"
     buttonText="Log In"
     linkText="Don't have an account? Sign Up"
